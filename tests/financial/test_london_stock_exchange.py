@@ -12,90 +12,84 @@
 
 from unittest import TestCase
 
-from holidays.countries.isle_of_man import IsleOfMan
-from tests.common import CommonCountryTests
+from holidays.financial.london_stock_exchange import LondonStockExchange
+from tests.common import CommonFinancialTests
 
 
-class TestIsleOfMan(CommonCountryTests, TestCase):
+class TestLondonStockExchange(CommonFinancialTests, TestCase):
     @classmethod
     def setUpClass(cls):
-        super().setUpClass(IsleOfMan)
+        super().setUpClass(LondonStockExchange)
 
-    def test_1970(self):
-        self.assertHolidaysInYear(
-            1970,
-            ("1970-03-27", "Good Friday"),
-            ("1970-03-30", "Easter Monday"),
-            ("1970-05-18", "Whit Monday"),
-            ("1970-06-05", "TT Bank Holiday"),
-            ("1970-07-05", "Tynwald Day"),
-            ("1970-12-25", "Christmas Day"),
-            ("1970-12-26", "Boxing Day"),
-            ("1970-12-28", "Boxing Day (observed)"),
+    def test_code(self):
+        self.assertTrue(hasattr(self.holidays, "market"))
+        self.assertIsNone(getattr(self.holidays, "country", None))
+
+    def test_weekend_holidays_are_not_trading_days(self):
+        self.assertNoHoliday(
+            "2020-12-26",
+            "2021-12-25",
+            "2021-12-26",
+            "2022-01-01",
+            "2022-12-25",
+            "2023-01-01",
         )
+
+    def test_christmas_eve(self):
+        name = "Christmas Eve (markets close at 12:30pm)"
+        self.assertNoHolidayName(name)
+        self.assertHalfDayHolidayName(
+            name,
+            "2020-12-24",
+            "2021-12-24",
+            "2022-12-23",
+            "2023-12-22",
+            "2024-12-24",
+            "2025-12-24",
+        )
+        self.assertHalfDayHolidayName(name, self.full_range)
+
+    def test_new_years_eve(self):
+        name = "New Year's Eve (markets close at 12:30pm)"
+        self.assertNoHolidayName(name)
+        self.assertHalfDayHolidayName(
+            name,
+            "2020-12-31",
+            "2021-12-31",
+            "2022-12-30",
+            "2023-12-29",
+            "2024-12-31",
+            "2025-12-31",
+        )
+        self.assertHalfDayHolidayName(name, self.full_range)
 
     def test_2022(self):
         self.assertHolidaysInYear(
             2022,
-            ("2022-01-01", "New Year's Day"),
             ("2022-01-03", "New Year's Day (observed)"),
             ("2022-04-15", "Good Friday"),
             ("2022-04-18", "Easter Monday"),
             ("2022-05-02", "May Day"),
             ("2022-06-02", "Spring Bank Holiday"),
-            ("2022-06-03", "Platinum Jubilee of Elizabeth II; TT Bank Holiday"),
-            ("2022-07-05", "Tynwald Day"),
+            ("2022-06-03", "Platinum Jubilee of Elizabeth II"),
             ("2022-08-29", "Late Summer Bank Holiday"),
             ("2022-09-19", "State Funeral of Queen Elizabeth II"),
-            ("2022-12-25", "Christmas Day"),
             ("2022-12-26", "Boxing Day"),
             ("2022-12-27", "Christmas Day (observed)"),
         )
 
-    def test_tt_bank_holiday(self):
-        name = "TT Bank Holiday"
-        self.assertHolidayName(
-            name,
-            "2020-06-05",
-            "2021-06-04",
-            "2022-06-03",
-            "2023-06-02",
-            "2024-06-07",
-            "2025-06-06",
-        )
-        self.assertHolidayName(name, self.full_range)
-
-    def test_tynwald_day(self):
-        name = "Tynwald Day"
-        self.assertNonObservedHolidayName(name, (f"{year}-07-05" for year in self.full_range))
-        obs_dts = (
-            "1992-07-06",
-            "1997-07-07",
-            "1998-07-06",
-            "2003-07-07",
-            "2008-07-07",
-            "2009-07-06",
-            "2014-07-07",
-            "2015-07-06",
-            "2020-07-06",
-            "2025-07-07",
-        )
-        self.assertHolidayName(name, obs_dts)
-        self.assertNoNonObservedHolidayName(name, obs_dts)
-
     def test_l10n_default(self):
-        # https://www.gov.im/categories/home-and-neighbourhood/bank-holidays/
         self.assertLocalizedHolidays(
             ("2024-01-01", "New Year's Day"),
             ("2024-03-29", "Good Friday"),
             ("2024-04-01", "Easter Monday"),
             ("2024-05-06", "May Day"),
             ("2024-05-27", "Spring Bank Holiday"),
-            ("2024-06-07", "TT Bank Holiday"),
-            ("2024-07-05", "Tynwald Day"),
             ("2024-08-26", "Late Summer Bank Holiday"),
+            ("2024-12-24", "Christmas Eve (markets close at 12:30pm)"),
             ("2024-12-25", "Christmas Day"),
             ("2024-12-26", "Boxing Day"),
+            ("2024-12-31", "New Year's Eve (markets close at 12:30pm)"),
         )
 
     def test_l10n_en_us(self):
@@ -106,11 +100,11 @@ class TestIsleOfMan(CommonCountryTests, TestCase):
             ("2024-04-01", "Easter Monday"),
             ("2024-05-06", "May Day"),
             ("2024-05-27", "Spring Bank Holiday"),
-            ("2024-06-07", "TT Bank Holiday"),
-            ("2024-07-05", "Tynwald Day"),
             ("2024-08-26", "Late Summer Bank Holiday"),
+            ("2024-12-24", "Christmas Eve (markets close at 12:30pm)"),
             ("2024-12-25", "Christmas Day"),
             ("2024-12-26", "Boxing Day"),
+            ("2024-12-31", "New Year's Eve (markets close at 12:30pm)"),
         )
 
     def test_l10n_th(self):
@@ -121,11 +115,11 @@ class TestIsleOfMan(CommonCountryTests, TestCase):
             ("2024-04-01", "วันจันทร์อีสเตอร์"),
             ("2024-05-06", "วันเมย์เดย์"),
             ("2024-05-27", "วันหยุดฤดูใบไม้ผลิของธนาคาร"),
-            ("2024-06-07", "วันแข่งไอร์ออฟแมน ทีที"),
-            ("2024-07-05", "วันไทน์วอลด์"),
             ("2024-08-26", "วันหยุดช่วงปลายฤดูร้อนของธนาคาร"),
+            ("2024-12-24", "วันคริสต์มาสอีฟ (ตลาดปิดเวลา 12:30 น.)"),
             ("2024-12-25", "วันคริสต์มาส"),
             ("2024-12-26", "วันเปิดกล่องของขวัญ"),
+            ("2024-12-31", "วันสิ้นปี (ตลาดปิดเวลา 12:30 น.)"),
         )
 
     def test_l10n_ur_pk(self):
@@ -136,9 +130,9 @@ class TestIsleOfMan(CommonCountryTests, TestCase):
             ("2024-04-01", "ایسٹر پیر"),
             ("2024-05-06", "یوم مئی"),
             ("2024-05-27", "موسم بہار کی بینک تعطیل"),
-            ("2024-06-07", "ٹی ٹی بینک کی تعطیل"),
-            ("2024-07-05", "ٹائن والڈ ڈے"),
             ("2024-08-26", "موسم گرما کے آخر کی بینک تعطیل"),
+            ("2024-12-24", "کرسمس کی شام (مارکیٹیں دوپہر 12:30 بجے بند ہوتی ہیں)"),
             ("2024-12-25", "کرسمس کا دن"),
             ("2024-12-26", "باکسنگ ڈے"),
+            ("2024-12-31", "نئے سال کی شام (مارکیٹیں دوپہر 12:30 بجے بند ہوتی ہیں)"),
         )
